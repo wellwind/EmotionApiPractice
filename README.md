@@ -1,5 +1,5 @@
 # EmotionApiPractice
-A ProjectOxford Emotion API practice, dectect the emotion from members of group on GitHub.
+A ProjectOxford Emotion API practice, that dectects the emotion from members of group on GitHub.
 
 # Reference
 - [Get Started with Emotion API in C#](https://www.microsoft.com/cognitive-services/en-us/emotion-api/documentation/getstarted) - Sample codes for using EmotionApi.
