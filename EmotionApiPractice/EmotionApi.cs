@@ -1,34 +1,32 @@
-﻿using System;
+﻿using AngleSharp.Dom;
+using Microsoft.ProjectOxford.Emotion;
+using Microsoft.ProjectOxford.Emotion.Contract;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AngleSharp.Dom;
-using Microsoft.ProjectOxford.Emotion;
-using Microsoft.ProjectOxford.Emotion.Contract;
-using Newtonsoft.Json;
 
 namespace EmotionApiPractice
 {
-    class EmotionApi
+    internal class EmotionApi
     {
-        private string key = "<<put your subscription key>>";
-
-        private string corp { get; set; }
-
+        private string key = "e2daecdf493b4e5b82e4bbbb2f4b6ee4";
+        private string org { get; set; }
         private string imgFolder { get; set; }
 
-        public EmotionApi(string corp, string imagesPath)
+        public EmotionApi(string gitHubOrg, string imagesPath)
         {
-            this.corp = corp;
+            org = gitHubOrg;
             imgFolder = imagesPath;
         }
 
-        public async void Run()
+        public async Task RunAsync()
         {
-            StreamWriter sw = new StreamWriter("./" + corp + ".csv");
+            StreamWriter sw = new StreamWriter("./" + org + ".csv");
             sw.WriteLine("file,result,Anger,Contempt,Disgust,Fear,Happiness,Neutral,Sadness,Surprise");
             EmotionServiceClient emotionServiceClient = new EmotionServiceClient(key);
 
@@ -38,10 +36,10 @@ namespace EmotionApiPractice
             {
                 var info = new FileInfo(image);
                 Console.Write(info.Name + $"({progress++}/{images.Count()})...");
-                
+
                 try
                 {
-                    await writeEmotionResultToStream(sw, emotionServiceClient, image, info);
+                    await writeEmotionResultToStreamAsync(sw, emotionServiceClient, image, info);
                 }
                 catch (Exception exception)
                 {
@@ -54,12 +52,11 @@ namespace EmotionApiPractice
             Console.WriteLine("All Emotions Done");
         }
 
-        private static async Task writeEmotionResultToStream(StreamWriter sw, EmotionServiceClient emotionServiceClient, string image, FileInfo info)
+        private static async Task writeEmotionResultToStreamAsync(StreamWriter sw, EmotionServiceClient emotionServiceClient, string image, FileInfo info)
         {
             Emotion[] emotionResult;
             using (Stream imageFileStream = File.OpenRead(image))
             {
-
                 emotionResult = await emotionServiceClient.RecognizeAsync(imageFileStream);
                 foreach (var face in emotionResult)
                 {

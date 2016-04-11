@@ -6,18 +6,24 @@ using System.Threading.Tasks;
 
 namespace EmotionApiPractice
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
-            var corp = "Apple";
-            var avatarsFetcher = new GithubAvatarFetcher(corp, "./" + corp);
-            avatarsFetcher.DownloadAvators();
-            var emotionApi = new EmotionApi(corp, "./" + corp);
-            Task.Run(() =>
+            var corp = "Microsoft";
+            Task.Run(async () =>
             {
-                emotionApi.Run();
-            });
+                await mainAsync(corp);
+            }).Wait();
+        }
+
+        private static async Task mainAsync(string corp)
+        {
+            //var avatarsFetcher = new GithubAvatarFetcher(corp, "./" + corp);
+            //await avatarsFetcher.DownloadAvators();
+
+            var emotionApi = new EmotionApi(corp, "./" + corp);
+            await emotionApi.RunAsync();
             Console.ReadKey();
         }
     }

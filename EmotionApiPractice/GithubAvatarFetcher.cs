@@ -1,4 +1,7 @@
-﻿using System;
+﻿using AngleSharp;
+using AngleSharp.Dom;
+using AngleSharp.Extensions;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,41 +9,33 @@ using System.Net;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 using System.Threading.Tasks;
-using AngleSharp;
-using AngleSharp.Dom;
-using AngleSharp.Extensions;
 
 namespace EmotionApiPractice
 {
     public class GithubAvatarFetcher
     {
-        private string corpName { get; set; }
-
+        private string gitHubOrg { get; set; }
         private string downloadFolder { get; set; }
 
-        public GithubAvatarFetcher(string corpName, string folderPath)
+        public GithubAvatarFetcher(string org, string folderPath)
         {
-            this.corpName = corpName;
-            downloadFolder= folderPath;
+            gitHubOrg = org;
+            downloadFolder = folderPath;
         }
 
-        public async void DownloadAvators()
+        public async Task DownloadAvators()
         {
             createFolderIfEmpty(downloadFolder);
 
             var pageCount = await getPageCountAsync();
             for (int page = 1; page <= pageCount; ++page)
             {
-                Console.WriteLine(String.Format("{0}: page {1}", corpName, page));
-
-                await Task.Run(() =>
-                {
-                    downloadAvatorsFromPageAsync(page);
-                });
+                Console.WriteLine($"{gitHubOrg}: page {page}");
+                await downloadAvatorsFromPageAsync(page);
             }
         }
-        
-        private async void downloadAvatorsFromPageAsync(int page)
+
+        private async Task downloadAvatorsFromPageAsync(int page)
         {
             IHtmlCollection<IElement> members = await getMembers(page);
 
@@ -78,20 +73,20 @@ namespace EmotionApiPractice
 
         private async Task<IHtmlCollection<IElement>> getMembers(int page)
         {
-            var url = String.Format("https://github.com/orgs/{0}/people?page={1}", corpName, page);
+            var url = String.Format("https://github.com/orgs/{0}/people?page={1}", gitHubOrg, page);
             var config = Configuration.Default.WithDefaultLoader();
             var document = await BrowsingContext.New(config).OpenAsync(url);
-            var selector = "#corpName-members li";
+            var selector = "#org-members li";
             var members = document.QuerySelectorAll(selector);
             return members;
         }
 
         private async Task<int> getPageCountAsync()
         {
-            var url = String.Format("https://github.com/orgs/{0}/people", corpName);
+            var url = String.Format("https://github.com/orgs/{0}/people", gitHubOrg);
             var config = Configuration.Default.WithDefaultLoader();
             var document = await BrowsingContext.New(config).OpenAsync(url);
-            var selector = "#corpName-members > div > div > a:nth-last-child(-n+2)";
+            var selector = "#org-members > div > div > a:nth-last-child(-n+2)";
             try
             {
                 var pages = document.QuerySelectorAll(selector);
